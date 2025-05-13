@@ -25,3 +25,4 @@
 
 ## Ideas de mejora futura
 - Corregir algunos aspectos del script para que la funcionalidad sea más eficiente.
+- arreglar favicon

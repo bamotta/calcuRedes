@@ -4,66 +4,27 @@ var classes;
 
 //function used to start the validation of the octects.
 function startValidationOctects() {
-    const octetos = ['octect1', 'octect2', 'octect3', 'octect4'];
-    octetos.forEach(id => {
-        const input = document.getElementById(id);
-        input.addEventListener('input', () => validationOctect(input));
-    });
-}
-
-function validationOctect(input) {
-    const valor = parseInt(input.value, 10);
-    input.style.borderColor = (!isNaN(valor) && valor >= 0 && valor <= 255) ? 'green' : 'red';
-}
-
-
-   
-function calculateClasses(classes) {
-    let octect1;
-
-    if (octect1 >= 1 && octect1 <= 126) {
-        classes = "Class A";
-    } else if (octect1 >= 128 && octect1 <= 191) {
-        classes = "Class B";
-    } else if (octect1 >= 192 && octect1 <= 223) {
-        classes = "Class C";
-    } else if (octect1 >= 224 && octect1 <= 239) {
-        classes = "Class D";
-    } else if (octect1 >= 240 && octect1 <= 254) {
-        classes = "Class E";
-    } else {
-        classes = "Invalid IP class";
-    }
-
-    alert(classes);
-};
-
-
-window.addEventListener('DOMContentLoaded', startValidationOctects);
-
-
-
 
     octects.forEach(id => {
     const input = document.getElementById(id);
     input.addEventListener('input', () => validationOctect(input));
   });
-
+}
 
 //function used to know if an octect has a valid number
 function validationOctect(input){
     const value = parseInt(input.value,10);
 
-    input.style.borderColor = isValidOctet(value) ? 'green' : 'red';
-    input.style.color = isValidOctet(value) ? 'green' : 'red';
+    input.style.borderColor = (!isNaN(value) && value >= 0 && value <= 255) ? 'green' : 'red';
+    input.style.color = (!isNaN(value) && value >= 0 && value <= 255) ? 'green' : 'red';
 }
 
-//function used to say what is a valid octect
+//function used to know if a octect is valid
 function isValidOctet(value) {
   return !isNaN(value) && value >= 0 && value <= 255;
 }
 
-//we call the function of the validation and add an event to the button "calculate"
+//we call the function of the validation
 window.addEventListener('DOMContentLoaded', () => {
   startValidationOctects();
   document.getElementById('calculate').addEventListener('click', calculate);
@@ -106,13 +67,30 @@ function showResults(){
     ipText.textContent = `Dirección IP: ${ipvalue}`;
     resultsDiv.appendChild(ipText);
 
-    /*calculateClasses();
+    calculateClasses();
 
     const classText = document.createElement('p');
-    classText.textContent = `Clase de IP: ${ipClass}`;
+    classText.textContent = `Clase de IP: ${classes}`;
     resultsDiv.appendChild(classText);
-*/
-    document.querySelector('main').appendChild(resultsDiv);
 
+    document.querySelector('main').appendChild(resultsDiv);
 }
 
+//function used to calculate the corresponding class
+function calculateClasses() {
+    const octect1 = values[0];
+
+    if (octect1 >= 0 && octect1 <= 127) {
+        classes = "Class A";
+    } else if (octect1 >= 128 && octect1 <= 191) {
+        classes = "Class B";
+    } else if (octect1 >= 192 && octect1 <= 223) {
+        classes = "Class C";
+    } else if (octect1 >= 224 && octect1 <= 239) { 
+        classes = "Class D";
+    } else if (octect1 >= 240 && octect1 <= 254) {
+        classes = "Class E";
+    } else {
+        classes = "Invalid IP class";
+    }
+};

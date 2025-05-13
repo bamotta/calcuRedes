@@ -74,6 +74,12 @@ function showResults(){
     resultsDiv.appendChild(classText);
 
     document.querySelector('main').appendChild(resultsDiv);
+
+
+    const ipPrivate = isPrivateIP(values);
+    const ipPublic = document.createElement('p');
+    ipPublic.textContent = `Tipo de red: ${ipPrivate ? 'Privada' : 'Pública'}`;
+    resultsDiv.appendChild(ipPublic);
 }
 
 //function used to calculate the corresponding class
@@ -94,3 +100,19 @@ function calculateClasses() {
         classes = "Invalid IP class";
     }
 };
+
+// Function to check if the IP is private
+function isPrivateIP(values) {
+    const octectfirst = values[0];
+    const octectSecond = values[1];
+
+    // Private IP ranges
+    if (
+        (octectfirst === 10) || 
+        (octectfirst === 172 && octectSecond >= 16 && octectSecond <= 31) || 
+        (octectfirst === 192 && octectSecond === 168) 
+    ) {
+        return true; // IP privada
+    }
+    return false; // IP pública
+}

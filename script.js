@@ -1,6 +1,7 @@
 const octects = ['octect1', 'octect2', 'octect3', 'octect4'];
 var values = [];
 var classes;
+var subnet;
 
 //function used to start the validation of the octects.
 function startValidationOctects() {
@@ -64,21 +65,26 @@ function showResults(){
 
     const ipText = document.createElement('p');
     const ipvalue = values.join('.');
-    ipText.textContent = `Dirección IP: ${ipvalue}`;
+    ipText.textContent = `IP direction: ${ipvalue}`;
     resultsDiv.appendChild(ipText);
 
     calculateClasses();
 
     const classText = document.createElement('p');
-    classText.textContent = `Clase de IP: ${classes}`;
+    classText.textContent = `IP class: ${classes}`;
     resultsDiv.appendChild(classText);
 
     document.querySelector('main').appendChild(resultsDiv);
 
+    calculateSubnet();
+
+    const subnetText = document.createElement('p');
+    subnetText.textContent = `Subnet: ${subnet}`;
+    resultsDiv.appendChild(subnetText);
 
     const ipPrivate = isPrivateIP(values);
     const ipPublic = document.createElement('p');
-    ipPublic.textContent = `Tipo de red: ${ipPrivate ? 'Privada' : 'Pública'}`;
+    ipPublic.textContent = `Net type: ${ipPrivate ? 'Private' : 'Public'}`;
     resultsDiv.appendChild(ipPublic);
 }
 
@@ -101,6 +107,19 @@ function calculateClasses() {
     }
 };
 
+//function used to know the subnet for each class
+function calculateSubnet(){
+    if(classes === "Class A"){
+        subnet = "255.0.0.0";
+    }else if(classes === "Class B"){
+        subnet = "255.255.0.0";
+    }else if(classes === "Class C"){
+        subnet = "255.255.255.0";
+    }else{
+        subnet = "not applicable";
+    }
+}
+
 // Function to check if the IP is private
 function isPrivateIP(values) {
     const octectfirst = values[0];
@@ -112,7 +131,7 @@ function isPrivateIP(values) {
         (octectfirst === 172 && octectSecond >= 16 && octectSecond <= 31) || 
         (octectfirst === 192 && octectSecond === 168) 
     ) {
-        return true; // IP privada
+        return true; // private IP
     }
-    return false; // IP pública
+    return false; // public IP
 }

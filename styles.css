@@ -43,11 +43,6 @@ fieldset {
     box-shadow: 0 4px 8px black
 }
 
-legend {
-    font-weight: bold;
-    color: #1e90ff;
-}
-
 input[type="number"] {
     width: 70px;
     padding: 8px;

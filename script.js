@@ -16,8 +16,8 @@ function startValidationOctects() {
 function validationOctect(input){
     const value = parseInt(input.value,10);
 
-    input.style.borderColor = (!isNaN(value) && value >= 0 && value <= 255) ? 'green' : 'red';
-    input.style.color = (!isNaN(value) && value >= 0 && value <= 255) ? 'green' : 'red';
+    input.style.borderColor = isValidOctet(value) ? 'green' : 'red';
+    input.style.color = isValidOctet(value) ? 'green' : 'red';
 }
 
 //function used to know if a octect is valid
@@ -63,9 +63,14 @@ function showResults(){
     const resultsDiv = document.createElement('div');
     resultsDiv.id = 'results';
 
+    const locationDot = document.createElement('i');
+    locationDot.classList.add("fa-solid", "fa-globe");
+    locationDot.style.color = "#1e90ff";
+
     const ipText = document.createElement('p');
     const ipvalue = values.join('.');
-    ipText.textContent = `IP direction: ${ipvalue}`;
+    ipText.appendChild(locationDot);
+    ipText.appendChild(document.createTextNode(` ${ipvalue}`));
     resultsDiv.appendChild(ipText);
 
     calculateClasses();

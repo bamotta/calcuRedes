@@ -1,6 +1,6 @@
 window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('calculate').addEventListener('click', calculate);
-document.getElementById('ipInput').addEventListener('input', validateIPInput);
+  document.getElementById('ipInput').addEventListener('input', validateIPInput);
 });
 
 // Función para validar si una IP tiene el formato correcto
@@ -99,7 +99,7 @@ function calculateClasses(values) {
         classes = "Class C";
     } else if (octect1 >= 224 && octect1 <= 239) { 
         classes = "Class D";
-    } else if (octect1 >= 240 && octect1 <= 254) {
+    } else if (octect1 >= 240 && octect1 <= 255) {
         classes = "Class E";
     } else {
         classes = "Invalid IP class";

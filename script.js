@@ -1,60 +1,54 @@
-const octects = ['octect1', 'octect2', 'octect3', 'octect4'];
-var values = [];
-var classes;
-var subnet;
-
-//function used to start the validation of the octects.
-function startValidationOctects() {
-
-    octects.forEach(id => {
-    const input = document.getElementById(id);
-    input.addEventListener('input', () => validationOctect(input));
-  });
-}
-
-//function used to know if an octect has a valid number
-function validationOctect(input){
-    const value = parseInt(input.value,10);
-
-    input.style.borderColor = isValidOctet(value) ? 'green' : 'red';
-    input.style.color = isValidOctet(value) ? 'green' : 'red';
-}
-
-//function used to know if a octect is valid
-function isValidOctet(value) {
-  return !isNaN(value) && value >= 0 && value <= 255;
-}
-
-//we call the function of the validation
 window.addEventListener('DOMContentLoaded', () => {
-  startValidationOctects();
   document.getElementById('calculate').addEventListener('click', calculate);
+document.getElementById('ipInput').addEventListener('input', validateIPInput);
 });
 
-//function used to calculate the IP
-function calculate(){
-    values = [];
+// Función para validar si una IP tiene el formato correcto
+function validateIPInput() {
+    const ipInput = document.getElementById('ipInput');
+    const ip = ipInput.value.trim();
 
-    for(let id of octects){
-
-        const input = document.getElementById(id);
-        const value = parseInt(input.value,10);
-        
-        if(isNaN(value) || value < 0 || value > 255){
-            alert("Todos los campos deben tener un número entre 0 y 255.");
-            return;
-        }
-
-        values.push(value);
+    // Validamos la IP completa con el regex
+    if (validateIP(ip)) {
+        ipInput.classList.remove('invalid');
+        ipInput.classList.add('valid');
+    } else {
+        ipInput.classList.remove('valid');
+        ipInput.classList.add('invalid');
     }
-
-    showResults();
-
 }
 
-//function used to show the results
-function showResults(){
 
+
+//función para validar la IP completa
+function validateIP(ip) {
+    const regex = /^(25[0-5]|2[0-4][0-9]|1\d{2}|[1-9]?\d)(\.(25[0-5]|2[0-4][0-9]|1\d{2}|[1-9]?\d)){3}$/;
+    return regex.test(ip);
+}
+
+//función para dividir la IP en octetos
+function parseIP(ip) {
+    return ip.split('.').map(Number);
+}
+
+//función principal de cálculo
+function calculate() {
+    const ipInput = document.getElementById('ipInput').value.trim();
+
+    if (!validateIP(ipInput)) {
+        alert("Por favor, ingresa una IP válida.");
+        return;
+    }
+
+    // Convertir la IP en una lista de octetos
+    const values = parseIP(ipInput);
+
+    // Mostrar los resultados
+    showResults(values);
+}
+
+//función para mostrar los resultados
+function showResults(values) {
     let previousResult = document.getElementById('results');
     if (previousResult) {
         previousResult.remove();
@@ -73,7 +67,7 @@ function showResults(){
     ipText.appendChild(document.createTextNode(` ${ipvalue}`));
     resultsDiv.appendChild(ipText);
 
-    calculateClasses();
+    calculateClasses(values);
 
     const classText = document.createElement('p');
     classText.textContent = `IP class: ${classes}`;
@@ -93,8 +87,8 @@ function showResults(){
     resultsDiv.appendChild(ipPublic);
 }
 
-//function used to calculate the corresponding class
-function calculateClasses() {
+//función para calcular la clase de la IP
+function calculateClasses(values) {
     const octect1 = values[0];
 
     if (octect1 >= 0 && octect1 <= 127) {
@@ -110,33 +104,32 @@ function calculateClasses() {
     } else {
         classes = "Invalid IP class";
     }
-};
+}
 
-//function used to know the subnet for each class
-function calculateSubnet(){
-    if(classes === "Class A"){
+//función para calcular la subnet
+function calculateSubnet() {
+    if (classes === "Class A") {
         subnet = "255.0.0.0";
-    }else if(classes === "Class B"){
+    } else if (classes === "Class B") {
         subnet = "255.255.0.0";
-    }else if(classes === "Class C"){
+    } else if (classes === "Class C") {
         subnet = "255.255.255.0";
-    }else{
+    } else {
         subnet = "not applicable";
     }
 }
 
-// Function to check if the IP is private
+// Función para verificar si la IP es privada
 function isPrivateIP(values) {
     const octectfirst = values[0];
     const octectSecond = values[1];
 
-    // Private IP ranges
     if (
         (octectfirst === 10) || 
         (octectfirst === 172 && octectSecond >= 16 && octectSecond <= 31) || 
         (octectfirst === 192 && octectSecond === 168) 
     ) {
-        return true; // private IP
+        return true;
     }
-    return false; // public IP
+    return false;
 }

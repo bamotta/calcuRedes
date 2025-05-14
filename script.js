@@ -107,7 +107,7 @@ function showResults(){
     calculateBroadcast();
 
     const broadcastText = document.createElement('p');
-    broadcastText.textContent = `Broadcast: `;
+    broadcastText.textContent = `Broadcast: ${broadcast}`;
     intDiv.appendChild(broadcastText);
 
     binarySubnet = changeToBinary(subnet);

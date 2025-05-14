@@ -1,52 +1,56 @@
-const octects = ['octect1', 'octect2', 'octect3', 'octect4'];
 var values = [];
 var classes;
 var subnet;
-
-//function used to start the validation of the octects.
-function startValidationOctects() {
-
-    octects.forEach(id => {
-    const input = document.getElementById(id);
-    input.addEventListener('input', () => validationOctect(input));
-  });
-}
-
-//function used to know if an octect has a valid number
-function validationOctect(input){
-    const value = parseInt(input.value,10);
-
-    input.style.borderColor = isValidOctet(value) ? 'green' : 'red';
-    input.style.color = isValidOctet(value) ? 'green' : 'red';
-}
-
-//function used to know if a octect is valid
-function isValidOctet(value) {
-  return !isNaN(value) && value >= 0 && value <= 255;
-}
+var wildCard;
+var binarySubnet;
+var binaryWildCard;
+var net;
+var broadcast;
+var hosts;
 
 //we call the function of the validation
 window.addEventListener('DOMContentLoaded', () => {
-  startValidationOctects();
-  document.getElementById('calculate').addEventListener('click', calculate);
+    document.getElementById('calculate').addEventListener('click', calculate);
+    document.getElementById('ipInput').addEventListener('input',validateIPInput);
 });
+
+//function used to validate the input
+function validateIPInput(){
+    const ipInput = document.getElementById('ipInput');
+    const ip =ipInput.value.trim();
+
+    if (validateIP(ip)) {
+        ipInput.classList.remove('invalid');
+        ipInput.classList.add('valid');
+    } else {
+        ipInput.classList.remove('valid');
+        ipInput.classList.add('invalid');
+    }
+}
+
+//function used to validate the IP number
+function validateIP(ip) {
+    const regex = /^(25[0-5]|2[0-4][0-9]|1\d{2}|[1-9]?\d)(\.(25[0-5]|2[0-4][0-9]|1\d{2}|[1-9]?\d)){3}$/;
+    return regex.test(ip);
+}
+
+//function used to separate the ip in octects
+function parseIP(ip) {
+    return ip.split('.').map(Number);
+}
 
 //function used to calculate the IP
 function calculate(){
     values = [];
 
-    for(let id of octects){
+    const ipInput = document.getElementById('ipInput').value.trim();
 
-        const input = document.getElementById(id);
-        const value = parseInt(input.value,10);
-        
-        if(isNaN(value) || value < 0 || value > 255){
-            alert("Todos los campos deben tener un número entre 0 y 255.");
-            return;
-        }
-
-        values.push(value);
+    if(!validateIP(ipInput)){
+        alert("Por favor, ingresa una IP válida.");
+        return;
     }
+
+    values = parseIP(ipInput);
 
     showResults();
 
@@ -63,6 +67,12 @@ function showResults(){
     const resultsDiv = document.createElement('div');
     resultsDiv.id = 'results';
 
+    const intDiv = document.createElement('div');
+    intDiv.id = 'intResults';
+
+    const binaryDiv = document.createElement('div');
+    binaryDiv.id = 'binaryResults';
+
     const locationDot = document.createElement('i');
     locationDot.classList.add("fa-solid", "fa-globe");
     locationDot.style.color = "#1e90ff";
@@ -71,26 +81,77 @@ function showResults(){
     const ipvalue = values.join('.');
     ipText.appendChild(locationDot);
     ipText.appendChild(document.createTextNode(` ${ipvalue}`));
-    resultsDiv.appendChild(ipText);
-
-    calculateClasses();
-
-    const classText = document.createElement('p');
-    classText.textContent = `IP class: ${classes}`;
-    resultsDiv.appendChild(classText);
+    intDiv.appendChild(ipText);
 
     document.querySelector('main').appendChild(resultsDiv);
 
+    calculateClasses();
     calculateSubnet();
 
     const subnetText = document.createElement('p');
     subnetText.textContent = `Subnet: ${subnet}`;
-    resultsDiv.appendChild(subnetText);
+    intDiv.appendChild(subnetText);
+
+    calculateWildCard();
+
+    const wildCarText = document.createElement('p');
+    wildCarText.appendChild(document.createTextNode(`Wildcard: ${wildCard}`));
+    intDiv.appendChild(wildCarText);
+
+    calculateNet();
+
+    const netText = document.createElement('p');
+    netText.id = 'netDecimalText';
+    netText.textContent = `Net: ${net}`;
+    intDiv.appendChild(netText);
+
+    calculateBroadcast();
+
+    const broadcastText = document.createElement('p');
+    broadcastText.textContent = `Broadcast: ${broadcast}`;
+    intDiv.appendChild(broadcastText);
+
+    binarySubnet = changeToBinary(subnet);
+    binaryWildCard = changeToBinary(wildCard)
+    calculateHostsAvaiable();
+
+    const hostsText = document.createElement('p');
+    hostsText.appendChild(document.createTextNode(`Hosts: ${hosts}`));
+    intDiv.appendChild(hostsText);
+
+    const classText = document.createElement('p');
+    classText.textContent = `IP class: ${classes}`;
+    intDiv.appendChild(classText);
 
     const ipPrivate = isPrivateIP(values);
     const ipPublic = document.createElement('p');
     ipPublic.textContent = `Net type: ${ipPrivate ? 'Private' : 'Public'}`;
-    resultsDiv.appendChild(ipPublic);
+    intDiv.appendChild(ipPublic);
+
+    const binaryIp = document.createElement('p');
+    binaryIp.textContent = changeToBinary(ipvalue);
+    binaryDiv.appendChild(binaryIp);
+
+    const binarySubnetText = document.createElement('p');
+    binarySubnetText.textContent = binarySubnet;
+
+    const binaryWildcardText = document.createElement('p');
+    binaryWildcardText.textContent = binaryWildCard;
+
+    binaryDiv.append(binarySubnetText,binaryWildcardText);
+
+    const binaryNetText = document.createElement('p');
+    binaryNetText.id = 'netText';
+    binaryNetText.textContent = changeToBinary(net);
+    binaryDiv.appendChild(binaryNetText);
+
+    const binaryBroadcastText = document.createElement('p');
+    binaryBroadcastText.textContent = changeToBinary(broadcast);
+    binaryDiv.appendChild(binaryBroadcastText);
+
+    resultsDiv.append(intDiv,binaryDiv);
+
+    colorizeNet();
 }
 
 //function used to calculate the corresponding class
@@ -105,7 +166,7 @@ function calculateClasses() {
         classes = "Class C";
     } else if (octect1 >= 224 && octect1 <= 239) { 
         classes = "Class D";
-    } else if (octect1 >= 240 && octect1 <= 254) {
+    } else if (octect1 >= 240 && octect1 <= 255) {
         classes = "Class E";
     } else {
         classes = "Invalid IP class";
@@ -139,4 +200,114 @@ function isPrivateIP(values) {
         return true; // private IP
     }
     return false; // public IP
+}
+
+//function used to calculte the wildcar
+function calculateWildCard(){
+
+    if (subnet === "not applicable") {
+    wildCard = "not applicable";
+    return;
+    }
+
+    const subnetParts = subnet.split('.').map(Number);
+    const wildcardParts = subnetParts.map(octet => 255 - octet);
+    wildCard = `${wildcardParts.join('.')}`;
+}
+
+//function used to calculate de avaiable hosts
+function calculateHostsAvaiable(){
+    if(subnet === "not applicable"){
+       hosts =  "not applicable";
+       return;
+    }
+
+    if (!binarySubnet) {
+        binarySubnet = changeToBinary(subnet);
+    }
+
+    const maskBits = binarySubnet.split('1').length - 1;
+    const hostsBits = 32 - maskBits;
+    hosts = Math.pow(2,hostsBits)-2;
+}
+
+//function used to change chains to binary
+function changeToBinary(chain){
+    if (!validateIP(chain)) return null;
+
+    return chain
+        .split('.')
+        .map(octet => parseInt(octet, 10).toString(2).padStart(8, '0'))
+        .join('.');
+}
+
+//function used to calculate the net
+function calculateNet(){
+        if (subnet === "not applicable") {
+        net = "not applicable";
+        return;
+    }
+
+    const subnetParts = subnet.split('.').map(Number);
+    const netAddres = values.map((octect,i) => octect & subnetParts[i]);
+    net = netAddres.join('.');
+}
+
+//function used to calculate the broadcast
+function calculateBroadcast(){
+    if (subnet === "not applicable") {
+        broadcast = "not applicable";
+        return;
+    }
+
+    const wildcardParts = wildCard.split('.').map(Number);
+    const broadcastAddress = values.map((octet, i) => octet | wildcardParts[i]);
+    broadcast = broadcastAddress.join('.');
+}
+
+//function to know the bits for the host and the bits for the net
+function colorizeNet(){
+    if(subnet === "not applicable"){
+        return;
+    }
+    const subnetParts = subnet.split('.').map(Number);
+    const binaryNetParts = changeToBinary(net).split('.');
+    const binarySubnetParts = binarySubnet.split('.');
+    const netParts = net.split('.').map(Number);
+
+    let coloredDecimalNet = '';
+    let coloredBinaryNet = '';
+
+    for (let i = 0; i < 4; i++) {   
+        let color;
+
+        if(subnetParts[i] === 255){
+            color = 'green';
+        } else if (subnetParts[i] === 0) {
+            color = 'red';
+        } else {
+            color = 'orange';
+        }
+
+        coloredDecimalNet += `<span style="color: ${color}">${subnetParts[i]}</span>`;
+        if (i < 3) coloredDecimalNet += '.';
+
+        for (let j = 0; j < 8; j++) {
+                        const bit = binaryNetParts[i][j];
+            const maskBit = binarySubnetParts[i][j];
+            let bitColor = maskBit === '1' ? 'green' : 'red';
+            coloredBinaryNet += `<span style="color: ${bitColor}">${bit}</span>`;
+        }
+
+        if (i < 3) coloredBinaryNet += '.';
+    }
+
+    const netDecimalElement = document.querySelector('#netDecimalText');
+    if (netDecimalElement) {
+        netDecimalElement.innerHTML = `Net: ${coloredDecimalNet}`;
+    }
+    const netTextElement = document.querySelector('#netText');
+    if (netTextElement) {
+        netTextElement.innerHTML = `${coloredBinaryNet}`;
+    }
 }

@@ -68,10 +68,10 @@ function showResults(){
     resultsDiv.id = 'results';
 
     const intDiv = document.createElement('div');
-    resultsDiv.id = 'intResults';
+    intDiv.id = 'intResults';
 
     const binaryDiv = document.createElement('div');
-    resultsDiv.id = 'binaryResults';
+    binaryDiv.id = 'binaryResults';
 
     const locationDot = document.createElement('i');
     locationDot.classList.add("fa-solid", "fa-globe");

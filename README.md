@@ -49,3 +49,4 @@
 ## Decisiones técnicas
 - Hemos decidio hacer que el Extra que nos pedian hoy: (diferenciar mediante colores la parte de red y la parte de host en la dirección IP.) hacer que directamente lea bit por bit la subnet.
 ## Ideas de mejora futura
+- comprobar que con mascaras mixtas funciona correctamente el colorizeNet.

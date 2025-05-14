@@ -19,7 +19,7 @@ function validateIPInput(){
     const ipInput = document.getElementById('ipInput');
     const ip =ipInput.value.trim();
 
-        if (validateIP(ip)) {
+    if (validateIP(ip)) {
         ipInput.classList.remove('invalid');
         ipInput.classList.add('valid');
     } else {
@@ -101,6 +101,7 @@ function showResults(){
     calculateNet();
 
     const netText = document.createElement('p');
+    netText.id = 'netDecimalText';
     netText.textContent = `Net: ${net}`;
     intDiv.appendChild(netText);
 
@@ -140,6 +141,7 @@ function showResults(){
     binaryDiv.append(binarySubnetText,binaryWildcardText);
 
     const binaryNetText = document.createElement('p');
+    binaryNetText.id = 'netText';
     binaryNetText.textContent = changeToBinary(net);
     binaryDiv.appendChild(binaryNetText);
 
@@ -148,6 +150,8 @@ function showResults(){
     binaryDiv.appendChild(binaryBroadcastText);
 
     resultsDiv.append(intDiv,binaryDiv);
+
+    colorizeNet();
 }
 
 //function used to calculate the corresponding class
@@ -223,7 +227,7 @@ function calculateHostsAvaiable(){
     }
 
     const maskBits = binarySubnet.split('1').length - 1;
-    const hostsBits = 32 -maskBits;
+    const hostsBits = 32 - maskBits;
     hosts = Math.pow(2,hostsBits)-2;
 }
 
@@ -259,4 +263,51 @@ function calculateBroadcast(){
     const wildcardParts = wildCard.split('.').map(Number);
     const broadcastAddress = values.map((octet, i) => octet | wildcardParts[i]);
     broadcast = broadcastAddress.join('.');
+}
+
+//function to know the bits for the host and the bits for the net
+function colorizeNet(){
+    if(subnet === "not applicable"){
+        return;
+    }
+    const subnetParts = subnet.split('.').map(Number);
+    const binaryNetParts = changeToBinary(net).split('.');
+    const binarySubnetParts = binarySubnet.split('.');
+    const netParts = net.split('.').map(Number);
+
+    let coloredDecimalNet = '';
+    let coloredBinaryNet = '';
+
+    for (let i = 0; i < 4; i++) {   
+        let color;
+
+        if(subnetParts[i] === 255){
+            color = 'green';
+        } else if (subnetParts[i] === 0) {
+            color = 'red';
+        } else {
+            color = 'orange';
+        }
+
+        coloredDecimalNet += `<span style="color: ${color}">${subnetParts[i]}</span>`;
+        if (i < 3) coloredDecimalNet += '.';
+
+        for (let j = 0; j < 8; j++) {
+                        const bit = binaryNetParts[i][j];
+            const maskBit = binarySubnetParts[i][j];
+            let bitColor = maskBit === '1' ? 'green' : 'red';
+            coloredBinaryNet += `<span style="color: ${bitColor}">${bit}</span>`;
+        }
+
+        if (i < 3) coloredBinaryNet += '.';
+    }
+
+    const netDecimalElement = document.querySelector('#netDecimalText');
+    if (netDecimalElement) {
+        netDecimalElement.innerHTML = `Net: ${coloredDecimalNet}`;
+    }
+    const netTextElement = document.querySelector('#netText');
+    if (netTextElement) {
+        netTextElement.innerHTML = `${coloredBinaryNet}`;
+    }
 }

@@ -83,14 +83,9 @@ function showResults(){
     ipText.appendChild(document.createTextNode(` ${ipvalue}`));
     intDiv.appendChild(ipText);
 
-    calculateClasses();
-
-    const classText = document.createElement('p');
-    classText.textContent = `IP class: ${classes}`;
-    intDiv.appendChild(classText);
-
     document.querySelector('main').appendChild(resultsDiv);
 
+    calculateClasses();
     calculateSubnet();
 
     const subnetText = document.createElement('p');
@@ -103,6 +98,18 @@ function showResults(){
     wildCarText.appendChild(document.createTextNode(`Wildcard: ${wildCard}`));
     intDiv.appendChild(wildCarText);
 
+    calculateNet();
+
+    const netText = document.createElement('p');
+    netText.textContent = `Net: ${net}`;
+    intDiv.appendChild(netText);
+
+    calculateBroadcast();
+
+    const broadcastText = document.createElement('p');
+    broadcastText.textContent = `Broadcast: `;
+    intDiv.appendChild(broadcastText);
+
     binarySubnet = changeToBinary(subnet);
     binaryWildCard = changeToBinary(wildCard)
     calculateHostsAvaiable();
@@ -110,6 +117,10 @@ function showResults(){
     const hostsText = document.createElement('p');
     hostsText.appendChild(document.createTextNode(`Hosts: ${hosts}`));
     intDiv.appendChild(hostsText);
+
+    const classText = document.createElement('p');
+    classText.textContent = `IP class: ${classes}`;
+    intDiv.appendChild(classText);
 
     const ipPrivate = isPrivateIP(values);
     const ipPublic = document.createElement('p');
@@ -119,6 +130,22 @@ function showResults(){
     const binaryIp = document.createElement('p');
     binaryIp.textContent = changeToBinary(ipvalue);
     binaryDiv.appendChild(binaryIp);
+
+    const binarySubnetText = document.createElement('p');
+    binarySubnetText.textContent = binarySubnet;
+
+    const binaryWildcardText = document.createElement('p');
+    binaryWildcardText.textContent = binaryWildCard;
+
+    binaryDiv.append(binarySubnetText,binaryWildcardText);
+
+    const binaryNetText = document.createElement('p');
+    binaryNetText.textContent = changeToBinary(net);
+    binaryDiv.appendChild(binaryNetText);
+
+    const binaryBroadcastText = document.createElement('p');
+    binaryBroadcastText.textContent = changeToBinary(broadcast);
+    binaryDiv.appendChild(binaryBroadcastText);
 
     resultsDiv.append(intDiv,binaryDiv);
 }
@@ -184,6 +211,7 @@ function calculateWildCard(){
     wildCard = `${wildcardParts.join('.')}`;
 }
 
+//function used to calculate de avaiable hosts
 function calculateHostsAvaiable(){
     if(subnet === "not applicable"){
        hosts =  "not applicable";
@@ -199,6 +227,7 @@ function calculateHostsAvaiable(){
     hosts = Math.pow(2,hostsBits)-2;
 }
 
+//function used to change chains to binary
 function changeToBinary(chain){
     if (!validateIP(chain)) return null;
 
@@ -206,4 +235,28 @@ function changeToBinary(chain){
         .split('.')
         .map(octet => parseInt(octet, 10).toString(2).padStart(8, '0'))
         .join('.');
+}
+
+//function used to calculate the net
+function calculateNet(){
+        if (subnet === "not applicable") {
+        net = "not applicable";
+        return;
+    }
+
+    const subnetParts = subnet.split('.').map(Number);
+    const netAddres = values.map((octect,i) => octect & subnetParts[i]);
+    net = netAddres.join('.');
+}
+
+//function used to calculate the broadcast
+function calculateBroadcast(){
+    if (subnet === "not applicable") {
+        broadcast = "not applicable";
+        return;
+    }
+
+    const wildcardParts = wildCard.split('.').map(Number);
+    const broadcastAddress = values.map((octet, i) => octet | wildcardParts[i]);
+    broadcast = broadcastAddress.join('.');
 }

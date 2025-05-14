@@ -26,3 +26,26 @@
 ## Ideas de mejora futura
 - Corregir algunos aspectos del script para que la funcionalidad sea más eficiente.
 - arreglar favicon
+
+# Sesión 2 Cálculo del tipo de Red 14/05/2025
+
+## Resumen
+- En esta sesión hemos implementado los diferentes objetivos que se proponían al principio de la sesión. Lo primero que hemos hecho ha sido sustituir los 4 inputs en un unico input y que se realizara la Validacion de dicho input luego hemos añadido al resumen las partes adicionales que nos han dado hoy y hemos hecho que se vean en decimal y luego en Binario cuando es posible,
+
+## Dificultades encontradas
+- Al añadir algunas funciones y darle al boton de calcular no nos mostraba los resultados.
+
+## Soluciones aplicadas
+- Fav icon arreglado*
+- Hicimos una revision del codigo y arreglamos el problema
+
+## Fuentes consultadas
+- Apuntes vistos en clases anteriores
+- https://developer.mozilla.org/es/docs/Web/JavaScript/Guide/Functions
+- https://es.stackoverflow.com/questions/20484/c%C3%B3mo-eliminar-los-botones-de-un-input-number
+- https://developer.mozilla.org/en-US/docs/Web/CSS/font-style
+- https://fontawesome.com/kits
+
+## Decisiones técnicas
+- Hemos decidio hacer que el Extra que nos pedian hoy: (diferenciar mediante colores la parte de red y la parte de host en la dirección IP.) hacer que directamente lea bit por bit la subnet.
+## Ideas de mejora futura

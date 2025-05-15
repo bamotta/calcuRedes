@@ -7,6 +7,7 @@ var binaryWildCard;
 var net;
 var broadcast;
 var hosts;
+var subnetNumber;
 
 //we call the function of the validation
 window.addEventListener('DOMContentLoaded', () => {
@@ -115,9 +116,15 @@ function showResults(){
     calculateWildCard();
     calculateNet();
     calculateBroadcast();
+    calculateSubnetNumber();
+
+    const hostMin = calculateHostMin();
+    const hostMax = calculateHostMax();
 
     const resultsDiv = document.createElement('div');
     resultsDiv.id = 'results';
+
+    document.querySelector('main').appendChild(resultsDiv);
 
     const intDiv = document.createElement('div');
     intDiv.id = 'intResults';
@@ -135,64 +142,87 @@ function showResults(){
     ipText.appendChild(document.createTextNode(` ${ipvalue}`));
     intDiv.appendChild(ipText);
 
-    document.querySelector('main').appendChild(resultsDiv);
 
     const subnetText = document.createElement('p');
-    subnetText.textContent = `Subnet: ${subnet}`;
+    subnetText.innerHTML = `<strong>Subnet:</strong> ${subnet}`;
     intDiv.appendChild(subnetText);
 
     const wildCarText = document.createElement('p');
-    wildCarText.appendChild(document.createTextNode(`Wildcard: ${wildCard}`));
+    wildCarText.innerHTML = `<strong>Wildcard:</strong> ${wildCard}`;
     intDiv.appendChild(wildCarText);
 
     const netText = document.createElement('p');
     netText.id = 'netDecimalText';
-    netText.textContent = `Net: ${net}`;
+    netText.innerHTML = `<strong>Net:</strong> ${net}`;
     intDiv.appendChild(netText);
 
     const broadcastText = document.createElement('p');
-    broadcastText.textContent = `Broadcast: ${broadcast}`;
+    broadcastText.innerHTML = `<strong>Broadcast:</strong> ${broadcast}`;
     intDiv.appendChild(broadcastText);
 
     binarySubnet = changeToBinary(subnet);
     binaryWildCard = changeToBinary(wildCard)
     calculateHostsAvaiable();
 
+    const hostMinText = document.createElement('p');
+    hostMinText.innerHTML = `<strong>minHost:</strong> ${hostMin}`;
+    intDiv.appendChild(hostMinText);
+
+    const hostMaxText = document.createElement('p');
+    hostMaxText.innerHTML = `<strong>maxHost:</strong> ${hostMax}`;
+    intDiv.appendChild(hostMaxText);
+
     const hostsText = document.createElement('p');
-    hostsText.appendChild(document.createTextNode(`Hosts: ${hosts}`));
+    hostsText.innerHTML = `<strong>Hosts:</strong> ${hosts}`;
     intDiv.appendChild(hostsText);
 
+    const subnetNumberText = document.createElement('p');
+    subnetNumberText.innerHTML = `<strong>Number of Subnets:</strong> ${subnetNumber}`;
+    intDiv.appendChild(subnetNumberText);
+
     const classText = document.createElement('p');
-    classText.textContent = `IP class: ${classes}`;
+    classText.innerHTML = `<strong>IP class:</strong> ${classes}`;
     intDiv.appendChild(classText);
+
+    const hexIp = changeToHex(ipvalue);
+    const hexIpText = document.createElement('p');
+    hexIpText.innerHTML = `<strong>Hex IP:</strong> ${hexIp}`;
+    intDiv.appendChild(hexIpText);
 
     const ipPrivate = isPrivateIP(values);
     const ipPublic = document.createElement('p');
-    ipPublic.textContent = `Net type: ${ipPrivate ? 'Private' : 'Public'}`;
+    ipPublic.innerHTML = `<strong>Net type:</strong> ${ipPrivate ? 'Private' : 'Public'}`;
     intDiv.appendChild(ipPublic);
 
-    const binaryIp = document.createElement('p');
-    binaryIp.textContent = changeToBinary(ipvalue);
-    binaryDiv.appendChild(binaryIp);
+    const binaryIpText = document.createElement('p');
+    const binaryIp = changeToBinary(ipvalue);
+    const inputBits = parseInt(document.getElementById('subnetInput').value.trim());
+    const defaultBits = getBits();
+    binaryIpText.innerHTML = `${colorizeBinaryIP(binaryIp, {
+        red: defaultBits,
+        subred: inputBits - defaultBits
+    })}`;
+
+    binaryDiv.appendChild(binaryIpText);
 
     const binarySubnetText = document.createElement('p');
-    binarySubnetText.textContent = binarySubnet;
+    binarySubnetText.textContent = `${binarySubnet}`;
 
     const binaryWildcardText = document.createElement('p');
-    binaryWildcardText.textContent = binaryWildCard;
+    binaryWildcardText.textContent = `${binaryWildCard}`;
 
-    binaryDiv.append(binarySubnetText,binaryWildcardText);
+    binaryDiv.append(binarySubnetText, binaryWildcardText);
 
     const binaryNetText = document.createElement('p');
     binaryNetText.id = 'netText';
-    binaryNetText.textContent = changeToBinary(net);
+    binaryNetText.textContent = `${changeToBinary(net)}`;
     binaryDiv.appendChild(binaryNetText);
 
     const binaryBroadcastText = document.createElement('p');
-    binaryBroadcastText.textContent = changeToBinary(broadcast);
+    binaryBroadcastText.textContent = `${changeToBinary(broadcast)}`;
     binaryDiv.appendChild(binaryBroadcastText);
 
-    resultsDiv.append(intDiv,binaryDiv);
+    resultsDiv.append(intDiv, binaryDiv);
 
     colorizeNet();
 }
@@ -315,6 +345,17 @@ function changeToBinary(chain){
         .join('.');
 }
 
+function changeToHex(chain) {
+    if (!validateIP(chain)) {
+        return "IP inválida";
+    }
+
+    return chain
+        .split('.')
+        .map(octet => parseInt(octet, 10).toString(16).toUpperCase().padStart(2, '0'))
+        .join('.');
+}
+
 //function used to calculate the net
 function calculateNet(){
         if (subnet === "not applicable") {
@@ -337,6 +378,64 @@ function calculateBroadcast(){
     const wildcardParts = wildCard.split('.').map(Number);
     const broadcastAddress = values.map((octet, i) => octet | wildcardParts[i]);
     broadcast = broadcastAddress.join('.');
+}
+
+//function used to calculate the number of subnets
+function calculateSubnetNumber(){
+    if(subnet === "not applicable"){
+        subnetNumber = "not applicable";
+        return;
+    }
+
+    const defaultBits = getBits();
+    const inputBits = parseInt(document.getElementById('subnetInput').value.trim());
+
+    console.log(`Class: ${classes}, inputBits: ${inputBits}, defaultBits: ${defaultBits}`);
+
+
+    if (isNaN(inputBits) || inputBits < defaultBits || inputBits > 30) {
+        subnetNumber = "invalid";
+        return;
+    }
+
+    const  subnetBits = inputBits - defaultBits;
+
+    subnetNumber =  Math.pow(2,subnetBits);
+
+}
+
+//function used to know the default number of bits for each class
+function getBits(){
+    switch (classes) {
+        case "Class A":
+            return 8;
+        case "Class B":
+            return 16;
+        case "Class C":
+            return 24;
+    }
+}
+
+//function used to calculate the minimun host
+function calculateHostMin() {
+    if (net === "not applicable") {
+        return "not applicable";
+    }
+
+    const netParts = net.split('.').map(Number);
+    netParts[3] += 1; 
+    return netParts.join('.');
+}
+
+//function used to calculate the maximun hosts
+function calculateHostMax() {
+    if (broadcast === "not applicable") {
+        return "not applicable";
+    }
+
+    const broadcastParts = broadcast.split('.').map(Number);
+    broadcastParts[3] -= 1;
+    return broadcastParts.join('.');
 }
 
 //function to know the bits for the host and the bits for the net
@@ -378,10 +477,59 @@ function colorizeNet(){
 
     const netDecimalElement = document.querySelector('#netDecimalText');
     if (netDecimalElement) {
-        netDecimalElement.innerHTML = `Net: ${coloredDecimalNet}`;
+        netDecimalElement.innerHTML = `<strong>Net:</strong> ${coloredDecimalNet}`;
     }
     const netTextElement = document.querySelector('#netText');
     if (netTextElement) {
         netTextElement.innerHTML = `${coloredBinaryNet}`;
     }
 }
+
+//function used to colorize the binary ip depending on each part
+function colorizeBinaryIP(binaryIP, bits) {
+  const totalBits = 32;
+
+  // Define number of bits for each part
+  const redBits = bits?.red || 0;
+  const subredBits = bits?.subred || 0;
+  const hostBits = totalBits - redBits - subredBits;
+
+  // Remove dots to get a plain binary string
+  const binary = binaryIP.replace(/\./g, '');
+
+  // Create a color map for each bit
+  const colorMap = [];
+  for (let i = 0; i < redBits; i++) colorMap.push('red');
+  for (let i = 0; i < subredBits; i++) colorMap.push('orange');
+  for (let i = 0; i < hostBits; i++) colorMap.push('green');
+
+  // Build colored binary string with dots between octets
+  let result = '';
+  let currentColor = '';
+  for (let i = 0; i < binary.length; i++) {
+    // Insert dot every 8 bits (i > 0 to avoid leading dot)
+    if (i > 0 && i % 8 === 0) {
+      result += '</span>.'; // Close current span before the dot
+      currentColor = '';    // Force span to reopen after dot
+    }
+
+    // Change span if color is different
+    const bitColor = colorMap[i];
+    if (bitColor !== currentColor) {
+      if (currentColor !== '') {
+        result += '</span>';
+      }
+      result += `<span style="color:${bitColor}">`;
+      currentColor = bitColor;
+    }
+
+    // Add the current bit
+    result += binary[i];
+  }
+
+  // Close the last open span
+  result += '</span>';
+  return result;
+}
+
+

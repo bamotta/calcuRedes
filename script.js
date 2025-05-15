@@ -21,6 +21,7 @@ window.addEventListener('DOMContentLoaded', () => {
         const ipInput = document.getElementById("ipInput");
         if (ipInput && data.ip) {
             ipInput.value = data.ip;
+            validateIPInput();
         }
     })
     .catch(error => {

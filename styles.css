@@ -164,21 +164,6 @@ width: 350px;
 
 }
 
-.red-part {
-color: red;
-font-weight: bold;
-}
-
-.subnet-part {
-color: orange;
-font-weight: bold;
-}
-
-.host-part {
-color: green;
-font-weight: bold;
-}
-
 footer {
     text-align: center;
     padding: 15px;

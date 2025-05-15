@@ -14,6 +14,17 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('calculate').addEventListener('click', calculate);
     document.getElementById('ipInput').addEventListener('input',validateIPInput);
     document.getElementById('subnetInput').addEventListener('input', validateBitsInput);
+    fetch("https://api64.ipify.org?format=json")
+    .then(response => response.json())
+    .then(data => {
+        const ipInput = document.getElementById("ipInput");
+        if (ipInput && data.ip) {
+            ipInput.value = data.ip;
+        }
+    })
+    .catch(error => {
+        console.error("No se pudo obtener la IP pública:", error);
+    });
 });
 
 //function used to validate the input

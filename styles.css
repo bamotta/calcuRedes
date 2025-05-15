@@ -109,7 +109,7 @@ input[type="number"].invalid {
     text-align: center;
 }
 
-#calculate {
+#calculate, #localIpBtn {
     background-color: #1e90ff;
     color: white;
     border: none;
@@ -121,7 +121,7 @@ input[type="number"].invalid {
     box-shadow: 0 4px 8px black
 }
 
-#calculate:hover {
+#calculate:hover, #localIpBtn:hover {
     background-color: #1263b5;
     transform: scale(1.1); 
     box-shadow: 0 4px 8px black

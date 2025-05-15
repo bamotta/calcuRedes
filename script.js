@@ -51,6 +51,17 @@ function calculate(){
     }
 
     values = parseIP(ipInput);
+    calculateClasses();
+    
+    if (subnetInput.value.trim() === "") {
+        if (classes === "Class A") {
+            subnetInput.value = "8";
+        } else if (classes === "Class B") {
+            subnetInput.value = "16";
+        } else if (classes === "Class C") {
+            subnetInput.value = "24";
+        }
+    }
 
     showResults();
 
@@ -63,6 +74,12 @@ function showResults(){
     if (previousResult) {
         previousResult.remove();
     }
+
+    calculateClasses();
+    calculateSubnet();
+    calculateWildCard();
+    calculateNet();
+    calculateBroadcast();
 
     const resultsDiv = document.createElement('div');
     resultsDiv.id = 'results';
@@ -85,27 +102,18 @@ function showResults(){
 
     document.querySelector('main').appendChild(resultsDiv);
 
-    calculateClasses();
-    calculateSubnet();
-
     const subnetText = document.createElement('p');
     subnetText.textContent = `Subnet: ${subnet}`;
     intDiv.appendChild(subnetText);
-
-    calculateWildCard();
 
     const wildCarText = document.createElement('p');
     wildCarText.appendChild(document.createTextNode(`Wildcard: ${wildCard}`));
     intDiv.appendChild(wildCarText);
 
-    calculateNet();
-
     const netText = document.createElement('p');
     netText.id = 'netDecimalText';
     netText.textContent = `Net: ${net}`;
     intDiv.appendChild(netText);
-
-    calculateBroadcast();
 
     const broadcastText = document.createElement('p');
     broadcastText.textContent = `Broadcast: ${broadcast}`;
@@ -174,16 +182,59 @@ function calculateClasses() {
 };
 
 //function used to know the subnet for each class
-function calculateSubnet(){
-    if(classes === "Class A"){
-        subnet = "255.0.0.0";
-    }else if(classes === "Class B"){
-        subnet = "255.255.0.0";
-    }else if(classes === "Class C"){
-        subnet = "255.255.255.0";
-    }else{
-        subnet = "not applicable";
+function calculateSubnet() {
+    const subnetInput = document.getElementById('subnetInput');
+    const bitsValue = subnetInput.value.trim();
+
+    if (bitsValue === "") {
+        // No se ingresaron bits → usar subred por defecto según clase
+        if (classes === "Class A") {
+            subnet = "255.0.0.0";
+        } else if (classes === "Class B") {
+            subnet = "255.255.0.0";
+        } else if (classes === "Class C") {
+            subnet = "255.255.255.0";
+        } else {
+            subnet = "not applicable";
+        }
+        return;
     }
+
+    const bits = parseInt(bitsValue);
+
+    if (!isNaN(bits) && validateBits(bits)) {
+        subnet = bitsToSubnet(bits);
+    } else {
+        if (classes === "Class D" || classes === "Class E") {
+            subnet = "not applicable";
+            alert("Las clases D y E no están destinadas a subredes.");
+        } else {
+            alert("Por favor, ingresa un número de bits válido para la clase " + classes);
+        }
+    }
+}
+
+//function used to validate the bits
+function validateBits(bits){
+    if (isNaN(bits) || bits < 1 || bits > 30) {
+        return false;
+    }
+
+    switch (classes) {
+        case "Class A":
+            return bits >= 8 && bits <= 30;
+        case "Class B":
+            return bits >= 16 && bits <= 30;
+        case "Class C":
+            return bits >= 24 && bits <= 30;
+    }
+}
+
+//function used to transform the inputSubnet into a subnet
+function bitsToSubnet(bits) {
+    let mask = ''.padStart(bits, '1').padEnd(32, '0');
+    const octets = mask.match(/.{1,8}/g).map(bin => parseInt(bin, 2));
+    return octets.join('.');
 }
 
 // Function to check if the IP is private

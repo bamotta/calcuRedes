@@ -22,9 +22,27 @@ function validateIPInput(){
     if (validateIP(ip)) {
         ipInput.classList.remove('invalid');
         ipInput.classList.add('valid');
+
+        emptySubnetInput(ip);
+
     } else {
         ipInput.classList.remove('valid');
         ipInput.classList.add('invalid');
+    }
+}
+
+function emptySubnetInput(ip){
+    const parsed = parseIP(ip);
+    const firstOctet = parsed[0];
+
+    if (firstOctet >= 0 && firstOctet <= 127) {
+        subnetInput.value = "8";
+    } else if (firstOctet >= 128 && firstOctet <= 191) {
+        subnetInput.value = "16";
+    } else if (firstOctet >= 192 && firstOctet <= 223) {
+        subnetInput.value = "24";
+    } else {
+        subnetInput.value = "";
     }
 }
 
@@ -51,17 +69,6 @@ function calculate(){
     }
 
     values = parseIP(ipInput);
-    calculateClasses();
-    
-    if (subnetInput.value.trim() === "") {
-        if (classes === "Class A") {
-            subnetInput.value = "8";
-        } else if (classes === "Class B") {
-            subnetInput.value = "16";
-        } else if (classes === "Class C") {
-            subnetInput.value = "24";
-        }
-    }
 
     showResults();
 

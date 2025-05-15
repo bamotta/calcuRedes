@@ -13,8 +13,8 @@ var subnetNumber;
 window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('calculate').addEventListener('click', calculate);
     document.getElementById('ipInput').addEventListener('input',validateIPInput);
-   
     document.getElementById('subnetInput').addEventListener('input', validateBitsInput);
+    
     fetch("https://api64.ipify.org?format=json")
     .then(response => response.json())
     .then(data => {
@@ -26,26 +26,6 @@ window.addEventListener('DOMContentLoaded', () => {
     .catch(error => {
         console.error("No se pudo obtener la IP pública:", error);
     });
-
-    document.getElementById("localIpBtn").addEventListener("click", () => {
-    const ipInput = document.getElementById("ipInput");
-
-    const pc = new RTCPeerConnection({iceServers: []});
-    pc.createDataChannel("");
-
-    pc.createOffer().then(offer => pc.setLocalDescription(offer)).catch(console.error);
-
-    pc.onicecandidate = event => {
-        if (!event || !event.candidate) return;
-
-        const ipRegex = /([0-9]{1,3}(\.[0-9]{1,3}){3})/;
-        const ipMatch = ipRegex.exec(event.candidate.candidate);
-        if (ipMatch) {
-            ipInput.value = ipMatch[1];
-            pc.close();
-        }
-    };
-});
 });
 
 

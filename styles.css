@@ -74,6 +74,16 @@ input[type="text"].invalid {
     color: red;
 }
 
+input[type="number"].valid {
+    border-color: green;
+    color: green;
+}
+
+input[type="number"].invalid {
+    border-color: red;
+    color: red;
+}
+
 #calcubutton {
     text-align: center;
 }

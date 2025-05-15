@@ -12,6 +12,7 @@ var hosts;
 window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('calculate').addEventListener('click', calculate);
     document.getElementById('ipInput').addEventListener('input',validateIPInput);
+    document.getElementById('subnetInput').addEventListener('input', validateBitsInput);
 });
 
 //function used to validate the input
@@ -31,6 +32,33 @@ function validateIPInput(){
     }
 }
 
+//function to validate the bits input
+function validateBitsInput() {
+    const subnetInput = document.getElementById('subnetInput');
+    const bitsValue = subnetInput.value.trim();
+    const bits = parseInt(bitsValue);
+
+    const ipInput = document.getElementById('ipInput').value.trim();
+    if (validateIP(ipInput)) {
+        values = parseIP(ipInput);
+        calculateClasses(); 
+    }
+
+    if (bitsValue === "") {
+        subnetInput.classList.remove('valid', 'invalid');
+        return;
+    }
+
+    if (!isNaN(bits) && validateBits(bits)) {
+        subnetInput.classList.remove('invalid');
+        subnetInput.classList.add('valid');
+    } else {
+        subnetInput.classList.remove('valid');
+        subnetInput.classList.add('invalid');
+    }
+}
+
+//function used to add a default number of bits for each class
 function emptySubnetInput(ip){
     const parsed = parseIP(ip);
     const firstOctet = parsed[0];
@@ -193,20 +221,6 @@ function calculateSubnet() {
     const subnetInput = document.getElementById('subnetInput');
     const bitsValue = subnetInput.value.trim();
 
-    if (bitsValue === "") {
-        // No se ingresaron bits → usar subred por defecto según clase
-        if (classes === "Class A") {
-            subnet = "255.0.0.0";
-        } else if (classes === "Class B") {
-            subnet = "255.255.0.0";
-        } else if (classes === "Class C") {
-            subnet = "255.255.255.0";
-        } else {
-            subnet = "not applicable";
-        }
-        return;
-    }
-
     const bits = parseInt(bitsValue);
 
     if (!isNaN(bits) && validateBits(bits)) {
@@ -291,10 +305,12 @@ function calculateHostsAvaiable(){
 
 //function used to change chains to binary
 function changeToBinary(chain){
-    if (!validateIP(chain)) return null;
+    const parts = chain.trim().split('.');
+    if (parts.length !== 4 || parts.some(p => isNaN(p) || p < 0 || p > 255)) {
+        return null;
+    }
 
-    return chain
-        .split('.')
+    return parts
         .map(octet => parseInt(octet, 10).toString(2).padStart(8, '0'))
         .join('.');
 }

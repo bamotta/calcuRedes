@@ -74,11 +74,42 @@ input[type="text"].invalid {
     color: red;
 }
 
+input[type="number"].valid {
+    border-color: green;
+    color: green;
+}
+
+input[type="number"] {
+    width: 100px;
+    padding: 8px;
+    margin: 5px;
+    font-size: 1rem;
+    text-align: center;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    transition: border-color 0.3s ease;
+}
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
+}
+
+input[type="number"]:focus{
+    border-color: #1e90ff;
+    outline: none; 
+}
+
+input[type="number"].invalid {
+    border-color: red;
+    color: red;
+}
+
 #calcubutton {
     text-align: center;
 }
 
-#calculate {
+#calculate, #localIpBtn {
     background-color: #1e90ff;
     color: white;
     border: none;
@@ -90,7 +121,7 @@ input[type="text"].invalid {
     box-shadow: 0 4px 8px black
 }
 
-#calculate:hover {
+#calculate:hover, #localIpBtn:hover {
     background-color: #1263b5;
     transform: scale(1.1); 
     box-shadow: 0 4px 8px black
@@ -130,8 +161,8 @@ width: 350px;
     font-weight: bold;
     font-size: 1.5rem;
     color: #1e90ff;
-}
 
+}
 
 footer {
     text-align: center;

@@ -291,7 +291,7 @@ function showResults(){
     const bitsInput = document.getElementById('subnetInput').value.trim();
     let inputBits = parseInt(bitsInput);
     if (isNaN(inputBits)) {
-        inputBits = maskToCIDR(subnet); // Usa bits derivados de la máscara
+        inputBits = maskToCIDR(subnet);
     }
     const defaultBits = getBits();
     binaryIpText.innerHTML = `${colorizeBinaryIP(binaryIp, {
@@ -328,13 +328,12 @@ function showResults(){
 function displaySubnets(subnets) {
     let oldDiv = document.getElementById('subnetSummary');
     if (oldDiv) {
-        oldDiv.remove(); // 🔥 Eliminamos el anterior
+        oldDiv.remove();
     }
     const subnetDiv = document.createElement('div');
     subnetDiv.id = 'subnetSummary';
     document.querySelector('main').appendChild(subnetDiv);
     subnetDiv.innerHTML = "";
-    subnetDiv.innerHTML = "<h2></h2>";
 
     if (!Array.isArray(subnets)) return;
 
@@ -344,16 +343,15 @@ function displaySubnets(subnets) {
     subnets.slice(0,maxToShow).forEach((s, i) => {
         subnetDiv.innerHTML += `
             <div class="subnet">
-                <h3>Subred ${i + 1}</h3>
-                <ul>
-                    <li><strong>Dirección de red:</strong> ${s.network}</li>
-                    <li><strong>Máscara:</strong> ${s.mask}</li>
-                    <li><strong>Wildcard:</strong> ${s.wildcard}</li>
-                    <li><strong>Broadcast:</strong> ${s.broadcast}</li>
-                    <li><strong>Host Mínimo:</strong> ${s.hostMin}</li>
-                    <li><strong>Host Máximo:</strong> ${s.hostMax}</li>
-                    <li><strong>Nº de Hosts:</strong> ${s.hosts}</li>
-                </ul>
+                <h3><i class="fa-solid fa-globe"></i> Subred ${i + 1}</h3>
+                    <p><strong>Dirección de red:</strong> ${s.network}</p>
+                    <p><strong>Máscara:</strong> ${s.mask}</p>
+                    <p><strong>Wildcard:</strong> ${s.wildcard}</p>
+                    <p><strong>Broadcast:</strong> ${s.broadcast}</p>
+                    <p><strong>Host Mínimo:</strong> ${s.hostMin}</p>
+                    <p><strong>Host Máximo:</strong> ${s.hostMax}</p>
+                    <p><strong>Nº de Hosts:</strong> ${s.hosts}</p>
+
             </div>
         `;
     });
@@ -426,6 +424,11 @@ function calculateWildcardFromMask(mask) {
 function calculateClasses() {
     const octect1 = values[0];
 
+    if (classes === "Class D" || classes === "Class E") {
+        alert("Las clases D y E no están destinadas a subredes.");
+        return;
+    }
+
     if (octect1 >= 0 && octect1 <= 127) {
         classes = "Class A";
     } else if (octect1 >= 128 && octect1 <= 191) {
@@ -451,14 +454,10 @@ function calculateSubnet() {
     if (!isNaN(bits) && validateBits(bits)) {
         subnet = bitsToSubnet(bits);
     } else {
-        if (classes === "Class D" || classes === "Class E") {
-            subnet = "not applicable";
-            alert("Las clases D y E no están destinadas a subredes.");
-        } else {
-            alert("Por favor, ingresa un número de bits válido para la clase " + classes);
-        }
+        subnet = "not applicable"; // ya no alertamos aquí
     }
 }
+
 
 //function used to validate the bits
 function validateBits(bits){

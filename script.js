@@ -334,7 +334,7 @@ function displaySubnets(subnets) {
     subnetDiv.id = 'subnetSummary';
     document.querySelector('main').appendChild(subnetDiv);
     subnetDiv.innerHTML = "";
-    subnetDiv.innerHTML = "<h2>Subredes</h2>";
+    subnetDiv.innerHTML = "<h2></h2>";
 
     if (!Array.isArray(subnets)) return;
 

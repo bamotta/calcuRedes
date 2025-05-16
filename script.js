@@ -8,6 +8,7 @@ var net;
 var broadcast;
 var hosts;
 var subnetNumber;
+var calculatedSubnets;
 
 //we charge the DOM before doing this actions
 window.addEventListener('DOMContentLoaded', () => {
@@ -29,6 +30,21 @@ window.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+//function used to validate the subnet mask
+function validateSubnetMask(mask){
+    const parts = mask.split('.').map(Number);
+    if (parts.length !== 4 || parts.some(p => p < 0 || p > 255)) return false;
+    let binary = parts.map(p => p.toString(2).padStart(8, '0')).join('');
+    return /^1*0*$/.test(binary);
+}
+
+//function used to know the number of bits from a mask
+function maskToCIDR(mask) {
+    return mask.split('.')
+        .map(octet => parseInt(octet).toString(2))
+        .join('')
+        .split('1').length - 1;
+}
 
 //function used to validate the input
 function validateIPInput(){
@@ -101,19 +117,81 @@ function parseIP(ip) {
 }
 
 //function used to calculate the IP
-function calculate(){
+function calculate() {
     values = [];
 
     const ipInput = document.getElementById('ipInput').value.trim();
+    const bitsValue = document.getElementById('subnetInput').value.trim();
+    const maskValue = document.getElementById('maskInput').value.trim();
 
-    if(!validateIP(ipInput)){
+
+    if (!validateIP(ipInput)) {
         alert("Por favor, ingresa una IP válida.");
         return;
     }
 
     values = parseIP(ipInput);
+    calculateClasses(); 
 
+    const hasBits = bitsValue !== "";
+    const hasMask = maskValue !== "";
+
+    let bits = null;
+    let mask = null;
+
+    //both
+    if (hasBits && hasMask) {
+        bits = parseInt(bitsValue);
+        if (!validateBits(bits)) {
+            alert("Bits inválidos para la clase " + classes);
+            return;
+        }
+        if (!validateSubnetMask(maskValue)) {
+            alert("Máscara no válida.");
+            return;
+        }
+        const maskBits = maskToCIDR(maskValue);
+        if (maskBits !== bits) {
+            alert("Los bits y la máscara no coinciden.");
+            return;
+        }
+        subnet = maskValue;
+    }
+
+    // only bits
+    else if (hasBits) {
+        bits = parseInt(bitsValue);
+        if (!validateBits(bits)) {
+            alert("Bits inválidos para la clase " + classes);
+            return;
+        }
+        subnet = bitsToSubnet(bits);
+    }
+
+    // only mask
+    else if (hasMask) {
+        if (!validateSubnetMask(maskValue)) {
+            alert("Máscara no válida.");
+            return;
+        }
+        bits = maskToCIDR(maskValue);
+        if (!validateBits(bits)) {
+            alert("La máscara no es válida para la clase " + classes);
+            return;
+        }
+        subnet = maskValue;
+    }
+
+    //empty
+    else {
+        alert("Debes introducir bits o una máscara válida.");
+        return;
+    }
+
+    calculatedSubnets = calculateSubnets(ipInput, subnet);
     showResults();
+    displaySubnets(calculatedSubnets);
+
 
 }
 
@@ -210,12 +288,17 @@ function showResults(){
 
     const binaryIpText = document.createElement('p');
     const binaryIp = changeToBinary(ipvalue);
-    const inputBits = parseInt(document.getElementById('subnetInput').value.trim());
+    const bitsInput = document.getElementById('subnetInput').value.trim();
+    let inputBits = parseInt(bitsInput);
+    if (isNaN(inputBits)) {
+        inputBits = maskToCIDR(subnet); // Usa bits derivados de la máscara
+    }
     const defaultBits = getBits();
     binaryIpText.innerHTML = `${colorizeBinaryIP(binaryIp, {
         red: defaultBits,
         subred: inputBits - defaultBits
     })}`;
+
 
     binaryDiv.appendChild(binaryIpText);
 
@@ -240,6 +323,104 @@ function showResults(){
 
     colorizeNet();
 }
+
+//function used to show the info of the subnet
+function displaySubnets(subnets) {
+    let oldDiv = document.getElementById('subnetSummary');
+    if (oldDiv) {
+        oldDiv.remove(); // 🔥 Eliminamos el anterior
+    }
+    const subnetDiv = document.createElement('div');
+    subnetDiv.id = 'subnetSummary';
+    document.querySelector('main').appendChild(subnetDiv);
+    subnetDiv.innerHTML = "";
+    subnetDiv.innerHTML = "<h2>Subredes</h2>";
+
+    if (!Array.isArray(subnets)) return;
+
+    const maxToShow = 8;
+    const totalSubnets = subnets.length;
+
+    subnets.slice(0,maxToShow).forEach((s, i) => {
+        subnetDiv.innerHTML += `
+            <div class="subnet">
+                <h3>Subred ${i + 1}</h3>
+                <ul>
+                    <li><strong>Dirección de red:</strong> ${s.network}</li>
+                    <li><strong>Máscara:</strong> ${s.mask}</li>
+                    <li><strong>Wildcard:</strong> ${s.wildcard}</li>
+                    <li><strong>Broadcast:</strong> ${s.broadcast}</li>
+                    <li><strong>Host Mínimo:</strong> ${s.hostMin}</li>
+                    <li><strong>Host Máximo:</strong> ${s.hostMax}</li>
+                    <li><strong>Nº de Hosts:</strong> ${s.hosts}</li>
+                </ul>
+            </div>
+        `;
+    });
+
+    if (totalSubnets > maxToShow) {
+        const restantes = totalSubnets - maxToShow;
+        subnetDiv.innerHTML += `<p><em>And ${restantes} more subnets...</em></p>`;
+    }
+
+}
+
+
+//function used to calculate the info of the subnets
+function calculateSubnets(ip, mask) {
+    const ipParts = ip.split('.').map(Number);
+    const maskParts = mask.split('.').map(Number);
+    const cidr = maskToCIDR(mask);
+    const totalHosts = Math.pow(2, 32 - cidr);
+    const hostsPerSubnet = totalHosts - 2;
+
+    const subnets = [];
+
+    const increment = totalHosts;
+    let current = (ipParts[0] << 24) | (ipParts[1] << 16) | (ipParts[2] << 8) | ipParts[3];
+
+    calculateSubnetNumber()
+    const numberOfSubnets = subnetNumber;
+
+    for (let i = 0; i < numberOfSubnets; i++) {
+        const network = current;
+        const broadcast = current + increment - 1;
+        const hostMin = network + 1;
+        const hostMax = broadcast - 1;
+
+        subnets.push({
+            network: intToIP(network),
+            broadcast: intToIP(broadcast),
+            hostMin: intToIP(hostMin),
+            hostMax: intToIP(hostMax),
+            mask: mask,
+            wildcard: calculateWildcardFromMask(mask),
+            hosts: hostsPerSubnet
+        });
+
+        current += increment;
+    }
+
+    return subnets;
+}
+
+//function used to transform an int into a IP format number
+function intToIP(int) {
+    return [
+        (int >> 24) & 255,
+        (int >> 16) & 255,
+        (int >> 8) & 255,
+        int & 255
+    ].join('.');
+}
+
+//function used to calculate the wild card from the mask
+function calculateWildcardFromMask(mask) {
+    return mask.split('.')
+        .map(o => 255 - parseInt(o))
+        .join('.');
+}
+
 
 //function used to calculate the corresponding class
 function calculateClasses() {
@@ -292,6 +473,7 @@ function validateBits(bits){
             return bits >= 16 && bits <= 30;
         case "Class C":
             return bits >= 24 && bits <= 30;
+        default: return false;
     }
 }
 
@@ -359,16 +541,15 @@ function changeToBinary(chain){
         .join('.');
 }
 
+//function used to change decimal numbers into hexadecimal
 function changeToHex(chain) {
-    if (!validateIP(chain)) {
-        return "IP inválida";
-    }
-
+    if (!validateIP(chain)) return null;
     return chain
         .split('.')
-        .map(octet => parseInt(octet, 10).toString(16).toUpperCase().padStart(2, '0'))
+        .map(octet => parseInt(octet, 10).toString(16).padStart(2, '0').toUpperCase())
         .join('.');
 }
+
 
 //function used to calculate the net
 function calculateNet(){
@@ -395,28 +576,14 @@ function calculateBroadcast(){
 }
 
 //function used to calculate the number of subnets
-function calculateSubnetNumber(){
-    if(subnet === "not applicable"){
-        subnetNumber = "not applicable";
-        return;
-    }
 
+function calculateSubnetNumber() {
+    const bits = maskToCIDR(subnet);
     const defaultBits = getBits();
-    const inputBits = parseInt(document.getElementById('subnetInput').value.trim());
-
-    console.log(`Class: ${classes}, inputBits: ${inputBits}, defaultBits: ${defaultBits}`);
-
-
-    if (isNaN(inputBits) || inputBits < defaultBits || inputBits > 30) {
-        subnetNumber = "invalid";
-        return;
-    }
-
-    const  subnetBits = inputBits - defaultBits;
-
-    subnetNumber =  Math.pow(2,subnetBits);
-
+    subnetNumber = Math.pow(2, bits - defaultBits);
+    return subnetNumber;
 }
+
 
 //function used to know the default number of bits for each class
 function getBits(){
@@ -427,6 +594,7 @@ function getBits(){
             return 16;
         case "Class C":
             return 24;
+        default: return 0;
     }
 }
 

@@ -164,6 +164,36 @@ width: 350px;
 
 }
 
+#subnetSummary {
+     width: 80%;
+    max-width: 850px;
+    margin: 40px;
+    padding: 30px;
+    background-color: white;
+    border-radius: 10px;
+    font-size: 1rem;
+    color: #333;
+    display: flex;
+    text-align: center;
+    flex-direction: column;
+    box-shadow: 0 4px 8px black
+}
+
+#subnetSummary h3 {
+    font-style: normal;
+    font-weight: bold;
+    font-size: 1.5rem;
+    color: #1e90ff;
+}
+
+#subnetSummary p {
+   font-size: 1.2rem;
+    line-height: 1.5;
+    margin-bottom: 10px;
+    font-family: 'Fira code', monospace;
+}
+
+
 footer {
     text-align: center;
     padding: 15px;

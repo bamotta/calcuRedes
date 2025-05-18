@@ -124,14 +124,34 @@ function calculate() {
     const bitsValue = document.getElementById('subnetInput').value.trim();
     const maskValue = document.getElementById('maskInput').value.trim();
 
-
     if (!validateIP(ipInput)) {
         alert("Por favor, ingresa una IP válida.");
         return;
     }
 
     values = parseIP(ipInput);
-    calculateClasses(); 
+
+    calculateClasses();
+    const isClassDE = (classes === "Class D" || classes === "Class E");
+    if (isClassDE) {
+        alert("Las clases D y E no están destinadas a subredes. Se mostrará información limitada.");
+        subnet = "no aplicable";
+        wildCard = "no aplicable";
+        net = "no aplicable";
+        broadcast = "no aplicable";
+        hosts = "no aplicable";
+        subnetNumber = "no aplicable";
+        calculatedSubnets = [];
+
+        const oldDiv = document.getElementById('subnetSummary');
+        if (oldDiv) {
+            oldDiv.remove();
+        }
+
+        showResults();
+        return;
+    }
+
 
     const hasBits = bitsValue !== "";
     const hasMask = maskValue !== "";
@@ -302,6 +322,9 @@ function showResults(){
 
     binaryDiv.appendChild(binaryIpText);
 
+    binarySubnet = subnet !== "not applicable" ? changeToBinary(subnet) : "not applicable";
+    binaryWildCard = wildCard !== "not applicable" ? changeToBinary(wildCard) : "not applicable";
+
     const binarySubnetText = document.createElement('p');
     binarySubnetText.textContent = `${binarySubnet}`;
 
@@ -312,11 +335,13 @@ function showResults(){
 
     const binaryNetText = document.createElement('p');
     binaryNetText.id = 'netText';
-    binaryNetText.textContent = `${changeToBinary(net)}`;
+    const binaryNet = net !== "not applicable" ? changeToBinary(net) : "not applicable";
+    binaryNetText.textContent = `${binaryNet}`;
     binaryDiv.appendChild(binaryNetText);
 
     const binaryBroadcastText = document.createElement('p');
-    binaryBroadcastText.textContent = `${changeToBinary(broadcast)}`;
+    const binaryBroadcast = broadcast !== "not applicable" ? changeToBinary(broadcast) : "not applicable";
+    binaryBroadcastText.textContent = `${binaryBroadcast}`;
     binaryDiv.appendChild(binaryBroadcastText);
 
     resultsDiv.append(intDiv, binaryDiv);
@@ -326,6 +351,11 @@ function showResults(){
 
 //function used to show the info of the subnet
 function displaySubnets(subnets) {
+    if (!Array.isArray(subnets) || subnets.length === 0) {
+    subnetDiv.innerHTML = "<p>No hay subredes para mostrar.</p>";
+    return;
+    }
+
     let oldDiv = document.getElementById('subnetSummary');
     if (oldDiv) {
         oldDiv.remove();
@@ -425,7 +455,6 @@ function calculateClasses() {
     const octect1 = values[0];
 
     if (classes === "Class D" || classes === "Class E") {
-        alert("Las clases D y E no están destinadas a subredes.");
         return;
     }
 
@@ -454,7 +483,7 @@ function calculateSubnet() {
     if (!isNaN(bits) && validateBits(bits)) {
         subnet = bitsToSubnet(bits);
     } else {
-        subnet = "not applicable"; // ya no alertamos aquí
+        subnet = "not applicable"; 
     }
 }
 
@@ -503,8 +532,8 @@ function isPrivateIP(values) {
 function calculateWildCard(){
 
     if (subnet === "not applicable") {
-    wildCard = "not applicable";
-    return;
+        wildCard = "not applicable";
+        return;
     }
 
     const subnetParts = subnet.split('.').map(Number);

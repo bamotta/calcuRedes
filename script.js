@@ -374,13 +374,13 @@ function displaySubnets(subnets) {
         subnetDiv.innerHTML += `
             <div class="subnet">
                 <h3><i class="fa-solid fa-globe"></i> Subred ${i + 1}</h3>
-                    <p><strong>Dirección de red:</strong> ${s.network}</p>
-                    <p><strong>Máscara:</strong> ${s.mask}</p>
+                    <p><strong>Net direction:</strong> ${s.network}</p>
+                    <p><strong>Mask:</strong> ${s.mask}</p>
                     <p><strong>Wildcard:</strong> ${s.wildcard}</p>
                     <p><strong>Broadcast:</strong> ${s.broadcast}</p>
-                    <p><strong>Host Mínimo:</strong> ${s.hostMin}</p>
-                    <p><strong>Host Máximo:</strong> ${s.hostMax}</p>
-                    <p><strong>Nº de Hosts:</strong> ${s.hosts}</p>
+                    <p><strong>Min Host:</strong> ${s.hostMin}</p>
+                    <p><strong>Max Host:</strong> ${s.hostMax}</p>
+                    <p><strong>Nº of Hosts:</strong> ${s.hosts}</p>
 
             </div>
         `;

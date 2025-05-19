@@ -55,7 +55,7 @@
 - comprobar que con mascaras mixtas funciona correctamente el colorizeNet.
 
 
-# Sesión 3 CMáscara de red personalizada 15/05/2025
+# Sesión 3 Máscara de red personalizada 15/05/2025
 
 ## Resumen
 - En esta sesión hemos implementado los diferentes objetivos que se proponían al principio de la sesión. Lo primero que hemos hecho ha sido añadir el input para la máscara personalizada, teniendo en cuenta que si no ponemos ninguna elegirá la máscara por defecto d la clase y que se escojan máscaras válidas para cada clase. Se ha actualizado la información de la red, añadiendo: número de subredes, host minimo y máximo y la dirección IP en formato hexadecimal. De la parte extra hemos decidido hacer la parte de los colores de la dirección IP en binario, separando por red, subred y host y seleccionar por defecto la IP pública del usuario.
@@ -64,7 +64,7 @@
 - Al añadir algunas funciones y darle al boton de calcular no nos mostraba los resultados.
 
 ## Soluciones aplicadas
-- implementación de cambios en el showResults para que no muestre nada si es una ip invalida.
+- Implementación de cambios en el showResults para que no muestre nada si es una ip invalida.
 
 ## Fuentes consultadas
 - Apuntes vistos en clases anteriores
@@ -78,3 +78,30 @@
 
 ## Ideas de mejora futura
 - ¿Añadir el botón de la IP local?
+
+
+
+
+# Sesión 4 Subredes
+
+## Resumen
+- En esta sesión hemos implementado los diferentes objetivos que se proponían al principio de la sesión. Lo primero que hemos hecho ha sido añadir el input para la nueva máscara personalizada, añadiendo las subredes y su información. 
+
+## Dificultades encontradas
+- Adaptar el código al nuevo input
+- Funcionalidad de las clases E y D
+
+## Soluciones aplicadas
+- Revisión de los alerts y donde estaban colocados
+- Revision de codigo y restructuración
+
+## Fuentes consultadas
+- Apuntes vistos en clases anteriores
+- https://developer.mozilla.org/es/docs/Web/JavaScript/Guide/Functions
+- https://es.stackoverflow.com/questions/20484/c%C3%B3mo-eliminar-los-botones-de-un-input-number
+- https://developer.mozilla.org/en-US/docs/Web/CSS/font-style
+
+## Decisiones técnicas
+- Añadimos las subredes en un nuevo div debajo del general para que se consulten las subredes si se quiere, pero que resalte la información de la red introducida.
+
+## Ideas de mejora futura
